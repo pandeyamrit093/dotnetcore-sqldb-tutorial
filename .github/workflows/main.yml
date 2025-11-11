@@ -1,0 +1,29 @@
+name: Deploy KeteMart NZ
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Build & Publish
+      run: |
+        dotnet restore
+        dotnet build --no-restore -c Release
+        dotnet publish --no-restore -c Release -o output
+
+    - name: Deploy to Azure
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ketemart-web-1762828796
+        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+        package: output
